@@ -33,17 +33,24 @@ const Table: React.FC<TableProps> = ({ users, onDelete }) => {
         dataTable.row.add([
           user.id,
           user.name,
-          user.id,
-          user.name,
-          user.id,
-          user.name,
-          user.id,
+          user.age + "/" + user.sex,
+          user.mobile,
+          user.address +
+            " " +
+            user.city +
+            " " +
+            user.pinCode +
+            "\n" +
+            " " +
+            user.state +
+            " " +
+            user.country,
+          user.IDType,
+          user.IDNumber,
           deleteButton,
         ]);
       });
-
       dataTable.draw();
-
       $(currentTableRef).DataTable();
 
       return () => {
@@ -58,21 +65,7 @@ const Table: React.FC<TableProps> = ({ users, onDelete }) => {
 
   return (
     <div style={{ paddingTop: "60px" }}>
-      <table ref={tableRef}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Mobile</th>
-            <th>Age</th>
-            <th>Sex</th>
-            <th>ID Type</th>
-            <th>ID Number</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>{/* DataTable will populate rows dynamically */}</tbody>
-      </table>
+      <table ref={tableRef}></table>
     </div>
   );
 };

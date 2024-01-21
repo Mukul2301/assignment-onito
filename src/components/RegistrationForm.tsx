@@ -2,9 +2,6 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import {
   TextField,
   Button,
-  Stepper,
-  Step,
-  StepLabel,
   InputLabel,
   MenuItem,
   Select,
@@ -19,8 +16,7 @@ import { RootState } from "../features/store";
 import { RegistrationFormData } from "../utils/types";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
-import React, { useEffect, useRef, useState } from "react";
-import $ from "jquery";
+import React, { useEffect, useState } from "react";
 import "datatables.net";
 import "datatables.net-dt/css/jquery.dataTables.css";
 import { yupSchema } from "../utils/yupSchema";
@@ -36,8 +32,10 @@ interface FormValues {
   country: string;
 }
 
-const RegistrationForm: React.FC = () => {
-  const [step, setStep] = useState(0);
+const RegistrationForm: React.FC<{
+  step: number;
+  setStep: React.Dispatch<React.SetStateAction<number>>;
+}> = ({ step, setStep }) => {
   const dispatch = useDispatch();
   const users = useSelector((state: RootState) => state.user.users);
   const {
@@ -113,48 +111,6 @@ const RegistrationForm: React.FC = () => {
     setStep(0);
   };
 
-  const tableRef = useRef<HTMLTableElement>(null);
-
-  useEffect(() => {
-    const currentTableRef = tableRef.current;
-
-    if (currentTableRef) {
-      $(currentTableRef).DataTable().destroy();
-
-      const dataTable = $(currentTableRef).DataTable({
-        columns: [
-          { title: "ID" },
-          { title: "Name" },
-          { title: "Age/Sex" },
-          { title: "Mobile" },
-          { title: "Address" },
-          { title: "ID Type" },
-          { title: "ID Number" },
-        ],
-      });
-
-      dataTable.clear();
-
-      users.forEach((user) => {
-        dataTable.row.add([
-          user.id,
-          user.name,
-          user.age,
-          user.mobile,
-          user.address,
-          user.IDType,
-          user.IDNumber,
-        ]);
-      });
-
-      dataTable.draw();
-
-      return () => {
-        dataTable.destroy();
-      };
-    }
-  }, [users]);
-
   console.log(users);
   const handleDelete = (userId: string) => {
     const updatedUsers = users.filter((user) => user.id !== userId);
@@ -172,15 +128,6 @@ const RegistrationForm: React.FC = () => {
         }}
       >
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Stepper activeStep={step} alternativeLabel>
-            <Step>
-              <StepLabel className="label">Personal Details</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel className="label">Address Details</StepLabel>
-            </Step>
-          </Stepper>
-
           {/* Step 1 */}
           {step === 0 && (
             <>
@@ -471,7 +418,6 @@ const RegistrationForm: React.FC = () => {
                         <TextField
                           style={{
                             left: "60px",
-                            backgroundColor: "beige",
                           }}
                           {...params}
                           label="Country"
@@ -507,13 +453,14 @@ const RegistrationForm: React.FC = () => {
               </Grid>
               <div>
                 <Button
+                  style={{ margin: "20px" }}
                   type="button"
                   variant="contained"
                   onClick={() => setStep(0)}
                 >
                   Back
                 </Button>
-                <Button type="submit" variant="contained" color="primary">
+                <Button type="submit" variant="contained" color="success">
                   Submit
                 </Button>
               </div>
