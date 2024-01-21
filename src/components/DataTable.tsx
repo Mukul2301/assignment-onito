@@ -1,101 +1,80 @@
-import React, { FC, useEffect, useRef } from "react";
-import { User } from "../types";
+import React, { useEffect, useRef } from "react";
+import $ from "jquery";
 
-interface DataTableProps {
-  users: User[];
+interface TableProps {
+  users: any[];
+  onDelete: (userId: string) => void;
 }
 
-const DataTable: FC<DataTableProps> = ({ users }) => {
-  const tableRef = useRef<HTMLTableElement | null>(null);
-  const dataTableRef = useRef<DataTables.Api | null>(null);
+const Table: React.FC<TableProps> = ({ users, onDelete }) => {
+  const tableRef = useRef<HTMLTableElement>(null);
+
   useEffect(() => {
     const currentTableRef = tableRef.current;
 
     if (currentTableRef) {
-      if (dataTableRef.current) {
-        // DataTable instance already exists, destroy it first
-        dataTableRef.current.destroy();
-      }
-
-      // Create a new DataTable instance
-      const newDataTable = $(currentTableRef).DataTable({
+      const dataTable = $(currentTableRef).DataTable({
         columns: [
           { title: "ID" },
           { title: "Name" },
+          { title: "Age/Sex" },
           { title: "Mobile" },
-          { title: "Age" },
-          { title: "Sex" },
+          { title: "Address" },
           { title: "ID Type" },
           { title: "ID Number" },
-          { title: "Country" },
-          // Add more columns based on your user data
+          { title: "Action" },
         ],
       });
 
-      // Clear existing rows
-      newDataTable.clear();
+      dataTable.clear();
 
-      // Add users to DataTable
       users.forEach((user) => {
-        newDataTable.row.add([
+        const deleteButton = `<button onclick="handleDelete('${user.id}')">Delete</button>`;
+        dataTable.row.add([
           user.id,
           user.name,
-          user.mobile,
-          user.age,
-          user.sex,
-          user.IDType,
-          user.IDNumber,
-          user.country,
-          // Add more columns based on your user data
+          user.id,
+          user.name,
+          user.id,
+          user.name,
+          user.id,
+          deleteButton,
         ]);
       });
 
-      // Draw the updated DataTable
-      newDataTable.draw();
+      dataTable.draw();
 
-      // Store the DataTable instance in the ref
-      dataTableRef.current = newDataTable;
+      $(currentTableRef).DataTable();
+
+      return () => {
+        dataTable.destroy();
+      };
     }
-  }, [users]);
+  }, [users, onDelete]);
 
-  useEffect(() => {
-    // Example: Destroy the DataTable when the component unmounts
-    return () => {
-      if (dataTableRef.current) {
-        dataTableRef.current.destroy();
-      }
-    };
-  }, []);
+  (window as any).handleDelete = (userId: string) => {
+    onDelete(userId);
+  };
+
   return (
-    <table ref={tableRef}>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Mobile</th>
-          <th>Age</th>
-          <th>Sex</th>
-          <th>ID Type</th>
-          <th>ID Number</th>
-          <th>Country</th>
-        </tr>
-      </thead>
-      <tbody>
-        {users.map((user) => (
-          <tr key={user.id}>
-            <td>{user.id}</td>
-            <td>{user.name}</td>
-            <td>{user.mobile}</td>
-            <td>{user.age}</td>
-            <td>{user.sex}</td>
-            <td>{user.IDType}</td>
-            <td>{user.IDNumber}</td>
-            <td>{user.country}</td>
+    <div style={{ paddingTop: "60px" }}>
+      <table ref={tableRef}>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Mobile</th>
+            <th>Age</th>
+            <th>Sex</th>
+            <th>ID Type</th>
+            <th>ID Number</th>
+            <th>Action</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>{/* DataTable will populate rows dynamically */}</tbody>
+      </table>
+    </div>
   );
 };
 
-export default DataTable;
+export default Table;

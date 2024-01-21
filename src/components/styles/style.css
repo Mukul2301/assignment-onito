@@ -1,4 +1,11 @@
 /* dataTablesStyles.css */
+body {
+  background-color: #f1efe7;
+  padding: 20px 20px;
+  font-family: "Poppins", sans-serif;
+}
+
+
 
 /* Basic styling for DataTable */
 table.dataTable {
@@ -47,6 +54,5 @@ table.dataTable {
     padding: 6px;
     box-sizing: border-box;
   }
-  
-  /* Add more custom styles as needed */
+
   

@@ -16,17 +16,18 @@ import {
   FormHelperText,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { addUser } from "../features/userSlice";
+import { addUser, deleteUser, setUsers } from "../features/userSlice";
 import { RootState } from "../features/store";
-import { RegistrationFormData } from "../types";
+import { RegistrationFormData } from "../utils/types";
 import { yupResolver } from "@hookform/resolvers/yup";
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import $ from "jquery";
 import "datatables.net";
 import "datatables.net-dt/css/jquery.dataTables.css";
-import { yupSchema } from "../yupSchema";
-import "../table.css";
+import { yupSchema } from "../utils/yupSchema";
+import "./styles/style.css";
+import Table from "./DataTable";
 
 interface CountryOption {
   label: string;
@@ -39,7 +40,6 @@ interface FormValues {
 
 const RegistrationForm: React.FC = () => {
   const [step, setStep] = useState(0);
-  const IDs = ["PAN", "Aadhar"];
   const dispatch = useDispatch();
   const users = useSelector((state: RootState) => state.user.users);
   const {
@@ -54,6 +54,11 @@ const RegistrationForm: React.FC = () => {
     mode: "onChange",
     resolver: yupResolver(yupSchema),
   });
+  useEffect(() => {
+    // Retrieve stored users from localStorage when the component mounts
+    const storedUsers = JSON.parse(localStorage.getItem("users") ?? "[]");
+    dispatch(setUsers(storedUsers));
+  }, [dispatch]);
 
   const validateFields = async () => {
     // Trigger field validation manually
@@ -105,8 +110,10 @@ const RegistrationForm: React.FC = () => {
     // Assuming you generate the user id on the client side
     const user = { id: String(Date.now()), ...data };
     dispatch(addUser(user));
+    const storedUsers = JSON.parse(localStorage.getItem("users") ?? "[]");
+    localStorage.setItem("users", JSON.stringify([...storedUsers, user]));
     console.log(user);
-    // Clear form after submission
+
     reset();
     setStep(0);
   };
@@ -124,14 +131,13 @@ const RegistrationForm: React.FC = () => {
       const dataTable = $(currentTableRef).DataTable({
         // Your DataTable options here
         columns: [
-          { title: "Column 1" },
-          { title: "Column 2" },
-          { title: "Column 3" },
-          { title: "Column 4" },
-          { title: "Column 5" },
-          { title: "Column 6" },
-          { title: "Column 7" },
-          { title: "Column 8" },
+          { title: "ID" },
+          { title: "Name" },
+          { title: "Age/Sex" },
+          { title: "Mobile" },
+          { title: "Address" },
+          { title: "ID Type" },
+          { title: "ID Number" },
         ],
         // Add more columns based on your user data
       });
@@ -143,12 +149,12 @@ const RegistrationForm: React.FC = () => {
         dataTable.row.add([
           user.id,
           user.name,
-          user.id,
-          user.name,
-          user.id,
-          user.name,
-          user.id,
-          user.name,
+          user.age,
+          user.mobile,
+          user.address,
+          user.IDType,
+          user.IDNumber,
+
           // Add more columns based on your user data
         ]);
       });
@@ -164,17 +170,29 @@ const RegistrationForm: React.FC = () => {
   }, [users]);
 
   console.log(users);
+  const handleDelete = (userId: string) => {
+    // Dispatch the action to delete the user
+    const updatedUsers = users.filter((user) => user.id !== userId);
+
+    dispatch(deleteUser(userId));
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+  };
 
   return (
     <>
-      <div>
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+      >
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stepper activeStep={step} alternativeLabel>
             <Step>
-              <StepLabel>Personal Details</StepLabel>
+              <StepLabel className="label">Personal Details</StepLabel>
             </Step>
             <Step>
-              <StepLabel>Address Details</StepLabel>
+              <StepLabel className="label">Address Details</StepLabel>
             </Step>
           </Stepper>
 
@@ -189,9 +207,17 @@ const RegistrationForm: React.FC = () => {
                 </h3>
                 <Grid container spacing={2} padding={2}>
                   <Grid item xs={12} sm={6} md={4}>
-                    <InputLabel>Name</InputLabel>
+                    <InputLabel
+                      style={{
+                        display: "inline-block",
+                        width: "70px",
+                        textAlign: "left",
+                        top: "7px",
+                      }}
+                    >
+                      Name
+                    </InputLabel>
                     <TextField
-                      fullWidth
                       placeholder="Enter Name"
                       {...register("name", { required: true })}
                       error={!!errors.name}
@@ -201,11 +227,19 @@ const RegistrationForm: React.FC = () => {
                     />
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
-                    <InputLabel>Date of Birth or Age</InputLabel>
-                    <FormControl fullWidth>
+                    <InputLabel
+                      style={{
+                        display: "inline-block",
+                        width: "120px",
+                        textAlign: "left",
+                        top: "2px",
+                      }}
+                    >
+                      Date of Birth <br />
+                      or Age
+                    </InputLabel>
+                    <FormControl style={{ width: "350px" }}>
                       <TextField
-                        fullWidth
-                        // label=""
                         placeholder="DD/MM/YYYY or Age in Years"
                         {...register("age")}
                         type="number"
@@ -218,12 +252,18 @@ const RegistrationForm: React.FC = () => {
 
                   <Grid item xs={12} sm={6} md={4}>
                     <InputLabel
-                      style={{ paddingBottom: "3px" }}
+                      style={{
+                        paddingBottom: "3px",
+                        display: "inline-block",
+                        width: "60px",
+                        textAlign: "left",
+                        top: "4px",
+                      }}
                       id="dropdown-placeholder"
                     >
                       Sex
                     </InputLabel>
-                    <FormControl fullWidth>
+                    <FormControl style={{ width: "160px" }}>
                       <InputLabel
                         style={{ top: "-8px" }}
                         id="dropdown-placeholder"
@@ -251,9 +291,19 @@ const RegistrationForm: React.FC = () => {
                   </Grid>
 
                   <Grid item xs={12} sm={6} md={4}>
-                    <InputLabel>Mobile</InputLabel>
+                    <InputLabel
+                      style={{
+                        paddingBottom: "3px",
+                        display: "inline-block",
+                        width: "60px",
+                        textAlign: "left",
+                        top: "6px",
+                      }}
+                    >
+                      Mobile
+                    </InputLabel>
                     <TextField
-                      style={{ width: "350px" }}
+                      style={{ width: "350px", right: "-7px" }}
                       placeholder="Enter Mobile"
                       {...register("mobile", { required: true })}
                       error={!!errors.mobile}
@@ -261,9 +311,21 @@ const RegistrationForm: React.FC = () => {
                       size="small"
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
-                    <InputLabel>Govt Issued ID</InputLabel>
-                    <FormControl fullWidth>
+                  <Grid item xs={12} sm={8} md={8}>
+                    <InputLabel
+                      style={{
+                        paddingBottom: "3px",
+                        display: "inline-block",
+                        width: "120px",
+                        textAlign: "left",
+                        top: "6px",
+                      }}
+                    >
+                      Govt Issued <br /> ID
+                    </InputLabel>
+                    <FormControl
+                      style={{ width: "160px", paddingRight: "20px" }}
+                    >
                       <InputLabel style={{ top: "-8px" }}>ID Type</InputLabel>
                       <Select
                         {...register("IDType", { required: true })}
@@ -283,10 +345,13 @@ const RegistrationForm: React.FC = () => {
                         </FormHelperText>
                       )}
                     </FormControl>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
-                    <InputLabel>A </InputLabel>
                     <TextField
+                      style={{
+                        paddingBottom: "3px",
+                        display: "inline-block",
+                        width: "650px",
+                        textAlign: "left",
+                      }}
                       placeholder="Enter Govt ID"
                       {...register("IDNumber")}
                       type="number"
@@ -324,54 +389,137 @@ const RegistrationForm: React.FC = () => {
               >
                 Address Details
               </h3>
-              <div>
-                <TextField
-                  label="Address"
-                  {...register("address")}
-                  error={!!errors.address}
-                  helperText={errors.address?.message}
-                  size="small"
-                />
-                <TextField
-                  label="City"
-                  {...register("city")}
-                  error={!!errors.city}
-                  helperText={errors.city?.message}
-                  size="small"
-                />
-                <TextField
-                  label="state"
-                  {...register("state")}
-                  error={!!errors.state}
-                  helperText={errors.state?.message}
-                  size="small"
-                />
-                {/* <AutoCompleteCountrySelector /> */}
-                <Autocomplete
-                  options={options}
-                  getOptionLabel={(option) => option.label}
-                  onInputChange={handleInputChange}
-                  onChange={(_, newValue) =>
-                    setValue("country", newValue?.value ?? "")
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Country"
-                      error={!!errors.country}
-                      helperText={errors.country?.message}
-                      size="small"
+
+              <Grid container spacing={2} padding={2}>
+                <Grid item xs={12} sm={6} md={4}>
+                  <InputLabel
+                    style={{
+                      paddingBottom: "3px",
+                      display: "inline-block",
+                      width: "60px",
+                      textAlign: "left",
+                      top: "6px",
+                      paddingRight: "20px",
+                    }}
+                  >
+                    Address
+                  </InputLabel>
+                  <TextField
+                    placeholder="Enter Address"
+                    style={{ width: "350px" }}
+                    label="Address"
+                    {...register("address")}
+                    error={!!errors.address}
+                    helperText={errors.address?.message}
+                    size="small"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <InputLabel
+                    style={{
+                      paddingBottom: "3px",
+                      display: "inline-block",
+                      width: "60px",
+                      textAlign: "left",
+                      top: "6px",
+                    }}
+                  >
+                    State
+                  </InputLabel>
+                  <TextField
+                    placeholder="Enter State"
+                    style={{ width: "300px" }}
+                    label="State"
+                    {...register("state")}
+                    error={!!errors.state}
+                    helperText={errors.state?.message}
+                    size="small"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <InputLabel
+                    style={{
+                      paddingBottom: "3px",
+                      display: "inline-block",
+                      width: "60px",
+                      textAlign: "left",
+                      top: "6px",
+                    }}
+                  >
+                    City
+                  </InputLabel>
+                  <TextField
+                    style={{ width: "300px" }}
+                    label="City"
+                    placeholder="Enter city/town/village"
+                    {...register("city")}
+                    error={!!errors.city}
+                    helperText={errors.city?.message}
+                    size="small"
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6} md={4}>
+                  <FormControl style={{ width: "260px" }}>
+                    <InputLabel
+                      style={{
+                        paddingBottom: "3px",
+                        display: "inline-block",
+                        textAlign: "left",
+                        top: "-10px",
+                        left: "-16px",
+                      }}
+                    >
+                      Country
+                    </InputLabel>
+                    <Autocomplete
+                      style={{
+                        paddingLeft: "20px",
+                      }}
+                      options={options}
+                      getOptionLabel={(option) => option.label}
+                      onInputChange={handleInputChange}
+                      onChange={(_, newValue) =>
+                        setValue("country", newValue?.value ?? "")
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          style={{
+                            left: "60px",
+                            backgroundColor: "beige",
+                          }}
+                          {...params}
+                          label="Country"
+                          error={!!errors.country}
+                          helperText={errors.country?.message}
+                          size="small"
+                        />
+                      )}
                     />
-                  )}
-                />
-                <TextField
-                  label="Pin Code"
-                  {...register("pinCode")}
-                  error={!!errors.pinCode}
-                  helperText={errors.pinCode?.message}
-                  size="small"
-                />
-              </div>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <InputLabel
+                    style={{
+                      paddingBottom: "3px",
+                      display: "inline-block",
+                      width: "100px",
+                      textAlign: "left",
+                      top: "6px",
+                    }}
+                  >
+                    Pin Code
+                  </InputLabel>
+                  <TextField
+                    placeholder="Enter pincode"
+                    label="Pin Code"
+                    {...register("pinCode")}
+                    error={!!errors.pinCode}
+                    helperText={errors.pinCode?.message}
+                    size="small"
+                  />
+                </Grid>
+              </Grid>
               <div>
                 <Button
                   type="button"
@@ -386,69 +534,11 @@ const RegistrationForm: React.FC = () => {
               </div>
             </>
           )}
-
-          {/* Display User Records in Table */}
-          {/* <TableContainer component={Paper} style={{ marginTop: "20px" }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Mobile</TableCell>
-              <TableCell>Age</TableCell>
-              <TableCell>Sex</TableCell>
-              <TableCell>ID Type</TableCell>
-              <TableCell>ID Number</TableCell>
-              <TableCell>Country</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.id}</TableCell>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.mobile}</TableCell>
-                <TableCell>{user.age}</TableCell>
-                <TableCell>{user.sex}</TableCell>
-                <TableCell>{user.IDType}</TableCell>
-                <TableCell>{user.IDNumber}</TableCell>
-                <TableCell>{user.country}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer> */}
         </form>
       </div>
-      <div>
-        <table ref={tableRef}>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Mobile</th>
-              <th>Age</th>
-              <th>Sex</th>
-              <th>ID Type</th>
-              <th>ID Number</th>
-              <th>Country</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.name}</td>
-                <td>{user.mobile}</td>
-                <td>{user.age}</td>
-                <td>{user.sex}</td>
-                <td>{user.IDType}</td>
-                <td>{user.IDNumber}</td>
-                <td>{user.country}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+      <div style={{ paddingTop: "40px" }}>
+        <Table users={users} onDelete={handleDelete} />
       </div>
     </>
   );
