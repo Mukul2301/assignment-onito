@@ -4,6 +4,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./features/userSlice";
 import "datatables.net-dt/css/jquery.dataTables.css";
 import StepperComponent from "./components/Stepper";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const store = configureStore({
   reducer: {
@@ -14,6 +16,7 @@ const store = configureStore({
 const App: React.FC = () => {
   return (
     <Provider store={store}>
+      <ToastContainer />
       <StepperComponent />
     </Provider>
   );

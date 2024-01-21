@@ -22,6 +22,7 @@ import "datatables.net-dt/css/jquery.dataTables.css";
 import { yupSchema } from "../utils/yupSchema";
 import "./styles/style.css";
 import Table from "./DataTable";
+import { toast } from "react-toastify";
 
 interface CountryOption {
   label: string;
@@ -105,18 +106,18 @@ const RegistrationForm: React.FC<{
     dispatch(addUser(user));
     const storedUsers = JSON.parse(localStorage.getItem("users") ?? "[]");
     localStorage.setItem("users", JSON.stringify([...storedUsers, user]));
-    console.log(user);
+    toast.success("Record Saved!");
 
     reset();
     setStep(0);
   };
 
-  console.log(users);
   const handleDelete = (userId: string) => {
     const updatedUsers = users.filter((user) => user.id !== userId);
 
     dispatch(deleteUser(userId));
     localStorage.setItem("users", JSON.stringify(updatedUsers));
+    toast.success("Record Deleted!");
   };
 
   return (
