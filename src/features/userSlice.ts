@@ -1,4 +1,3 @@
-// userSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { User } from '../utils/types';
 
@@ -21,10 +20,10 @@ const userSlice = createSlice({
     deleteUser: (state, action: PayloadAction<string>) => {
       const userIdToDelete = action.payload;
 
-      // Find the index of the user with the matching ID
+
       const indexToDelete = state.users.findIndex(user => user.id === userIdToDelete);
 
-      // Check if the user with the given ID exists
+
       if (indexToDelete !== -1) {
      
         state.users.splice(indexToDelete, 1);

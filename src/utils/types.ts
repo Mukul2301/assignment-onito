@@ -1,5 +1,3 @@
-// types.ts
-
 interface CountryOption {
   name: string;
 }

@@ -1,13 +1,9 @@
-/* dataTablesStyles.css */
 body {
   background-color: #f1efe7;
   padding: 20px 20px;
   font-family: "Poppins", sans-serif;
 }
 
-
-
-/* Basic styling for DataTable */
 table.dataTable {
     border-collapse: collapse;
     width: 100%;
@@ -17,7 +13,6 @@ table.dataTable {
   
   }
   
-  /* DataTable header styling */
   table.dataTable thead th {
     background-color: #84b37e;
     color:black;
@@ -25,30 +20,25 @@ table.dataTable {
     margin: 100px;
   }
   
-  /* DataTable body styling */
   table.dataTable tbody tr {
     background-color: #f3ecec;
     color:black;
     border: 1px solid #ddd;
   }
   
-  /* Alternate row coloring for better readability */
   table.dataTable tbody tr:nth-child(even) {
     background-color: #f9f9f9;
   }
   
-  /* Hover effect on rows */
   table.dataTable tbody tr:hover {
     background-color: #e0e0e0;
   }
-  
-  /* Styling for DataTable pagination */
+
   div.dataTables_paginate {
     text-align: right;
     padding: 10px;
   }
   
-  /* Adjust the size of DataTable search input */
   div.dataTables_filter input {
     width: 200px;
     padding: 6px;

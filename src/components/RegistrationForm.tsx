@@ -1,5 +1,3 @@
-// RegistrationForm.tsx
-
 import { useForm, SubmitHandler } from "react-hook-form";
 import {
   TextField,
@@ -55,13 +53,11 @@ const RegistrationForm: React.FC = () => {
     resolver: yupResolver(yupSchema),
   });
   useEffect(() => {
-    // Retrieve stored users from localStorage when the component mounts
     const storedUsers = JSON.parse(localStorage.getItem("users") ?? "[]");
     dispatch(setUsers(storedUsers));
   }, [dispatch]);
 
   const validateFields = async () => {
-    // Trigger field validation manually
     const isValid = await trigger([
       "name",
       "mobile",
@@ -107,7 +103,6 @@ const RegistrationForm: React.FC = () => {
   };
 
   const onSubmit: SubmitHandler<RegistrationFormData> = (data) => {
-    // Assuming you generate the user id on the client side
     const user = { id: String(Date.now()), ...data };
     dispatch(addUser(user));
     const storedUsers = JSON.parse(localStorage.getItem("users") ?? "[]");
@@ -124,12 +119,9 @@ const RegistrationForm: React.FC = () => {
     const currentTableRef = tableRef.current;
 
     if (currentTableRef) {
-      // Destroy the existing DataTable instance (if any)
       $(currentTableRef).DataTable().destroy();
 
-      // Create a new DataTable instance
       const dataTable = $(currentTableRef).DataTable({
-        // Your DataTable options here
         columns: [
           { title: "ID" },
           { title: "Name" },
@@ -139,10 +131,8 @@ const RegistrationForm: React.FC = () => {
           { title: "ID Type" },
           { title: "ID Number" },
         ],
-        // Add more columns based on your user data
       });
 
-      // Clear existing rows
       dataTable.clear();
 
       users.forEach((user) => {
@@ -154,15 +144,11 @@ const RegistrationForm: React.FC = () => {
           user.address,
           user.IDType,
           user.IDNumber,
-
-          // Add more columns based on your user data
         ]);
       });
 
-      // Draw the updated DataTable
       dataTable.draw();
 
-      // Example: Destroy the DataTable when the component unmounts
       return () => {
         dataTable.destroy();
       };
@@ -171,7 +157,6 @@ const RegistrationForm: React.FC = () => {
 
   console.log(users);
   const handleDelete = (userId: string) => {
-    // Dispatch the action to delete the user
     const updatedUsers = users.filter((user) => user.id !== userId);
 
     dispatch(deleteUser(userId));
