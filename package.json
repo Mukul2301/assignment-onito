@@ -58,6 +58,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@hookform/devtools": "^4.3.1",
     "@types/datatables.net": "^1.10.28",
     "@types/jquery": "^3.5.29",
