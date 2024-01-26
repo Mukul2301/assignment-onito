@@ -29,10 +29,6 @@ interface CountryOption {
   value: string;
 }
 
-interface FormValues {
-  country: string;
-}
-
 const RegistrationForm: React.FC<{
   step: number;
   setStep: React.Dispatch<React.SetStateAction<number>>;
